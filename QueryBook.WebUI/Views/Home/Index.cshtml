@@ -1,0 +1,117 @@
+﻿@model QueryBook.WebUI.Models.Home.HomeViewModel
+    @{ 
+    ViewBag.Title = "Script Kütüphanesi";
+    ViewBag.SubTitle = "Yönetim Paneli";
+    Layout = "~/Views/Shared/Partials/LayoutPage.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <p>@ViewBag.fileTxt</p>
+        <div class="col-md-12">
+          
+                @Html.AntiForgeryToken()
+            <div class="card card-primary">
+                <div class="card-header">
+                    <h3 class="card-title">Sql Scriptler</h3><br />
+                    <a class="btn btn-success query" href="javascript:void(0)" data-id="0">Yeni Script Ekle</a>
+                </div>
+                @if (Model != null)
+                {
+
+                    
+                    <table id="dataTable" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+
+                                <th>Sıra No</th>
+                                <th>Adı</th>
+                                <th>Açıklama</th>
+                                <th>İşlem</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            @foreach (var item in Model.queries)
+                            {
+                                <tr>
+                                    <td>@item.OrderNo</td>
+                                    <td>@item.Name</td>
+                                    <td>@item.Explanation</td>
+                                    <td style="width:10px;"><center><a href="javascript:void(0)" data-id="@item.Id" title="Script İncele" class="btn btn-primary mh23 btnTable query"><i style="color:white" class="fa fa-search"></i></a></center></td>
+                                </tr>
+
+                            }
+
+
+                        </tbody>
+                        <tfoot>
+                            <tr></tr>
+                        </tfoot>
+
+                    </table>
+                }
+            </div>
+            
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12">
+           @Html.ActionLink("Oturum Kapat","LogOut",new { @class="btn btn-primary"})
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="queryModal" style="display: none;" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content bg-default">
+            <div class="modal-header">
+                <h4 class="modal-title">Script Ekle</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body" id="queryModalContent">
+               
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-outline-light" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-outline-light">Save changes</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<script src="https://code.jquery.com/jquery-latest.js"></script>
+<script>
+    $(document).on("click", ".query", function (event) {
+       
+         $('#queryModalContent').html("");
+            var $buttonClicked = $(this);
+        var id = $buttonClicked.attr('data-id');
+            var options = { "backdrop": "false", keyboard: true };
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("QueryDetail")',
+                contentType: "application/json; charset=utf-8",
+                data: { "id": id},
+                datatype: "json",
+                success: function (data) {
+                    $('#queryModalContent').html(data);
+                    $('#queryModal').modal(options);
+                //$('#personModal').appendTo("body").modal('show');
+                    $('#queryModal').modal('show');
+                    $("#queryModal").css("z-index", "1500");
+                    
+                },
+                error: function (e) {
+                    $('#queryModal').modal('hide');
+                    Toast.fire({
+                        type: 'error',
+                        title: 'Query Bilgisi Alınamadı'
+                    })
+                }
+                });
+});
+
+</script>
